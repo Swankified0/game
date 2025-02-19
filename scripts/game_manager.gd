@@ -45,7 +45,7 @@ func updateDebug(
 	\nDash Jump = " + str(dashJump) + "
 	\nDash Land = " + str(dashLand) + "
 	\nHas Wall Jump = " + str(hasWallJump) + "
-	\nWall Stick = " + str(wallStick) + "dDDdddddd Wall Stick Release = " + str(wallStickRelease)
+	\nWall Stick = " + str(wallStick) + " Wall Stick Release = " + str(wallStickRelease)
 
 func closeDebug():
 	debugLabels.text = ""
