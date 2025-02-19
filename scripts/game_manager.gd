@@ -31,7 +31,6 @@ func updateDebug(
 		dashLand,
 		hasWallJump,
 		wallStick,
-		stickingDirection,
 		wallStickRelease,
 	):
 	debugLabels.text = "Coordinates: (" + str(posX) + ", " + str(posY) + ")
@@ -46,7 +45,7 @@ func updateDebug(
 	\nDash Jump = " + str(dashJump) + "
 	\nDash Land = " + str(dashLand) + "
 	\nHas Wall Jump = " + str(hasWallJump) + "
-	\nWall Stick = " + str(wallStick) + " Sticking Direction = " + str(stickingDirection) + " Wall Stick Release = " + str(wallStickRelease)
+	\nWall Stick = " + str(wallStick) + "dDDdddddd Wall Stick Release = " + str(wallStickRelease)
 
 func closeDebug():
 	debugLabels.text = ""
