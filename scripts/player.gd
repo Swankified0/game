@@ -117,7 +117,6 @@ var debugMenu: int = -1
 var dashCountdown: int = 0
 var wallJumpCountdown: int = 0
 var wallStickRelease: int = 0
-var stickingDirection: int = 0
 
 var direction: int
 var facing: int = 1
@@ -186,14 +185,12 @@ func _physics_process(delta: float) -> void:
 			#Stick Right
 			if dashType == 2.3:
 				wallStick = true
-				stickingDirection = 1
 				
 				velocity = STOP
 				wallStickRelease = WALL_STICK_RELEASE
 			#Stick Left
 			elif dashType == 2.7:
 				wallStick = true
-				stickingDirection = -1
 				
 				velocity = STOP
 				wallStickRelease = WALL_STICK_RELEASE
@@ -213,11 +210,9 @@ func _physics_process(delta: float) -> void:
 			
 			else:
 				wallStick = false
-				stickingDirection = 0
 			
 		else:
 			wallStick = false
-			stickingDirection = 0
 			wallStickRelease = 0
 	
 	#Handle dash countdowns and Dash Landing
@@ -541,7 +536,6 @@ func _physics_process(delta: float) -> void:
 			dashLand,
 			hasWallJump,
 			wallStick,
-			stickingDirection,
 			wallStickRelease,
 			)
 	else:
