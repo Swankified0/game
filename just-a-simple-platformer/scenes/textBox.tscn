@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=3 uid="uid://cgkyugf78mxib"]
+
+[ext_resource type="Script" path="res://scripts/text_box.gd" id="1_02f8a"]
+[ext_resource type="FontFile" uid="uid://cxo4c7wfsxrmg" path="res://assets/fonts/PixelOperator8.ttf" id="2_vr7ae"]
+
+[node name="TextBox" type="MarginContainer"]
+script = ExtResource("1_02f8a")
+
+[node name="NinePatchRect" type="NinePatchRect" parent="."]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("2_vr7ae")
+vertical_alignment = 1
+
+[node name="LetterDisplayTimer" type="Timer" parent="."]
+one_shot = true
+
+[connection signal="timeout" from="LetterDisplayTimer" to="." method="_on_letter_display_timer_timeout"]
