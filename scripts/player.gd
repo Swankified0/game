@@ -108,6 +108,11 @@ var dashSpeedx: float
 var dashSpeedy: float
 var dashFriction: float = 1
 
+var turningFactor: float
+
+var accel: float
+var gravity: float
+
 var maxSpeedx: float
 var maxSpeedy: float
 
@@ -361,7 +366,6 @@ func _physics_process(delta: float) -> void:
 			print("45")
 			velocity = Vector2(-facing * 381, -381)
 	
-	var turningFactor
 	#Figure out if the player is turning (holding the direction they aren't moving)
 	if (direction > 0 and velocity.x < 0) or (direction < 0 and velocity.x > 0):
 		turning = true
@@ -385,7 +389,7 @@ func _physics_process(delta: float) -> void:
 	else:
 		maxSpeedx = MAX_AIR_SPEED * direction
 	
-	var gravity = GRAVITY
+	gravity = GRAVITY
 	#Apply max vertical speed and gravity
 	if crouching:
 		maxSpeedy = 700
@@ -393,9 +397,7 @@ func _physics_process(delta: float) -> void:
 	
 	else:
 		maxSpeedy = 500
-		gravity = GRAVITY
 	
-	var accel
 	#Handle acceleration/decceleration
 	if direction != 0:
 		if grounded:
@@ -511,6 +513,10 @@ func _physics_process(delta: float) -> void:
 		#Apply movement for idling from motion
 		else:
 			velocity.x = move_toward(velocity.x, 0, accel * delta)
+	
+	move_and_slide()
+
+func _process(delta: float) -> void:
 		
 	#Debug labels
 	if Input.is_action_just_pressed("debug"):
@@ -542,5 +548,3 @@ func _physics_process(delta: float) -> void:
 		game_manager.closeDebug()
 	
 	debug()
-	
-	move_and_slide()
