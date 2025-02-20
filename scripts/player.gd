@@ -33,6 +33,8 @@ func getCardinal():
 	return Vector2(x,y)
 
 #Constants
+const INPUT_BUFFER: int = 5
+
 const AIR_ACCEL = 425
 const GROUND_ACCEL = 280
 const TURNING_ACCEL_FACTOR = 15
@@ -93,6 +95,9 @@ const STOP: Vector2 = Vector2(0,0)
 #Variables
 
 #Booleans
+var bufferedJump: bool = false
+var bufferedDash: bool = false
+
 var isTalking: bool = false
 var dashRelease: bool = false
 var dashJump: bool = false
@@ -124,6 +129,9 @@ var maxSpeedx: float
 var maxSpeedy: float
 
 #Integers
+var jumpBuffer: int = 0
+var dashBuffer: int = 0
+
 var debugMenu: int = -1
 
 var dashCountdown: int = 0
@@ -153,11 +161,26 @@ func _ready():
 func _on_isTalking_signal(value: bool):
 	isTalking = value
 
+#Input buffers function
+func buffer():
+	#Jump buffer
+	if Input.is_action_just_pressed("Jump"):
+		jumpBuffer = INPUT_BUFFER
+	elif jumpBuffer > 0:
+		jumpBuffer -= 1
+	
+	if Input.is_action_just_pressed("dash"):
+		dashBuffer = INPUT_BUFFER
+	elif dashBuffer > 0:
+		dashBuffer -= 1
+
 #TO DO:
 #Expand turn mechanic
 #Add dash slip
 #Add jump countdown so the separation rays don't push you away from platforms
 func _physics_process(delta: float) -> void:
+	buffer()
+	
 	#Emit various player state signals
 	emit_signal("isGrounded", grounded)
 	if velocity.x > 25 or velocity.x < -25:
@@ -276,9 +299,10 @@ func _physics_process(delta: float) -> void:
 		dashCountdown -= 1
 	
 	elif dashCountdown > 0:
+		
 		dashType = 0
-
 		dashLand = false
+		
 		#Dash Jumping does not reset the countdown to keep the lower air resistance
 		if not dashJump:
 			if grounded:
@@ -311,7 +335,8 @@ func _physics_process(delta: float) -> void:
 		walk_push_ray_right.disabled = false
 	
 	#Handle dashes
-	if Input.is_action_just_pressed("dash") and dashType == 0 and not dashRelease:
+	if dashBuffer > 0 and dashType == 0 and not dashRelease:
+		dashBuffer = 0
 		#Ground dash
 		if grounded:
 			#Crouch dash is shorter
@@ -348,7 +373,9 @@ func _physics_process(delta: float) -> void:
 		wallJumping = false
 	
 	# Handle Jumps and Dash Jumps
-	if Input.is_action_just_pressed("Jump") and grounded and dashType == 0:
+	if jumpBuffer > 0 and grounded and dashType == 0:
+		jumpBuffer = 0
+		
 		if crouching:
 			if dashRelease: #Dash Hop
 				dashJump = true
