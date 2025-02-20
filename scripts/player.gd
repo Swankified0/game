@@ -1,5 +1,8 @@
 extends CharacterBody2D
 
+signal isMoving(value: bool)
+signal isGrounded(value: bool)
+
 @onready var playerSprite = $AnimatedSprite2D
 @onready var hitbox_body_right: CollisionShape2D = $HitboxBodyRight
 @onready var hitbox_body_left: CollisionShape2D = $HitboxBodyLeft
@@ -141,6 +144,17 @@ func debug():
 #Add dash slip
 #Add jump countdown so the separation rays don't push you away from platforms
 func _physics_process(delta: float) -> void:
+	#Emit various state signals
+	emit_signal("isGrounded", grounded)
+	if velocity.x > 25 or velocity.x < -25:
+		emit_signal("isMoving", true)
+	else:
+		emit_signal("isMoving", false)
+	
+	#Skip physics movement when player is talking
+	if isTalking:
+		return
+	
 	#Check if the player is on the ground
 	if is_on_floor():
 		grounded = true
