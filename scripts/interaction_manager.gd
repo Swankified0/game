@@ -1,5 +1,7 @@
 extends Node2D
 
+signal isTalking(value: bool)
+
 @onready var player = get_tree().get_first_node_in_group("player")
 @onready var label: Label = $Label
 
@@ -8,6 +10,25 @@ const baseText = "[C] to "
 var active_areas = []
 var canInteract = true
 
+#Receive Signals
+	#Declare variables
+var isGrounded: bool
+var isMoving: bool
+
+	#Handler Functions for Signals
+func _on_isGrounded_signal(value: bool):
+	isGrounded = value
+func _on_isMoving_signal(value: bool):
+	isMoving = value
+
+func _ready():
+	#Connect player state signals
+	var player = get_node("/root/Game/Player")
+	
+	player.isGrounded.connect(_on_isGrounded_signal)
+	player.isMoving.connect(_on_isMoving_signal)
+
+#Register Area
 func registerArea(area: InteractionArea):
 	print("area registered")
 	active_areas.push_back(area)
@@ -46,6 +67,9 @@ func _input(event):
 			canInteract = false
 			label.hide()
 			
+			emit_signal("isTalking", true)
+			
 			await active_areas[0].interact.call()
 			
 			canInteract = true
+			emit_signal("isTalking", false)

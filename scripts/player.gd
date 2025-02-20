@@ -1,5 +1,8 @@
 extends CharacterBody2D
 
+signal isMoving(value: bool)
+signal isGrounded(value: bool)
+
 @onready var playerSprite = $AnimatedSprite2D
 @onready var hitbox_body_right: CollisionShape2D = $HitboxBodyRight
 @onready var hitbox_body_left: CollisionShape2D = $HitboxBodyLeft
@@ -87,6 +90,7 @@ const STOP: Vector2 = Vector2(0,0)
 #Variables
 
 #Booleans
+var isTalking: bool = false
 var dashRelease: bool = false
 var dashJump: bool = false
 var dashLand: bool = false
@@ -134,19 +138,38 @@ func debug():
 	print("Grounded = " + str(grounded) + " Crouching = " + str(crouching) + " Turning = " +
 	str(turning) + " Dash Countdown = " + str(dashCountdown) + " Dash Type = " + str(dashType) +
 	" Dash Release = " + str(dashRelease) + " Dash Jump = " + str(dashJump) + " hasAirDash = " + 
-	str(hasAirdash) + " Wall Jump = " + str(wallJumping) + " Wall Jump Countdown = " + str(wallJumpCountdown))
+	str(hasAirdash) + " Wall Jump = " + str(wallJumping) + " Wall Jump Countdown = " +
+	str(wallJumpCountdown) + " isTalking = " + str(isTalking))
+
+func _ready():
+	#Handle connections with Interaction Manager
+	print(".")
+	var connection1 = get_node("/root/InteractionManager")
+	connection1.isTalking.connect(_on_isTalking_signal)
+
+func _on_isTalking_signal(value: bool):
+	isTalking = value
 
 #TO DO:
 #Expand turn mechanic
 #Add dash slip
 #Add jump countdown so the separation rays don't push you away from platforms
 func _physics_process(delta: float) -> void:
+	#Emit various player state signals
+	emit_signal("isGrounded", grounded)
+	if velocity.x > 25 or velocity.x < -25:
+		emit_signal("isMoving", true)
+	else:
+		emit_signal("isMoving", false)
+	
+	#Skip physics when player is talking
+	if isTalking:
+		return
+	
 	#Check if the player is on the ground
 	if is_on_floor():
 		grounded = true
-		
 		hasWallJump = true
-	
 	else:
 		grounded = false
 	
@@ -157,11 +180,8 @@ func _physics_process(delta: float) -> void:
 	else:
 		crouching = false
 	
-	#Get input vector if not sticking to wall
-	if not wallStick:
-		inputVector = getCardinal()
-	else:
-		inputVector = STOP
+	#Get input vector
+	inputVector = getCardinal()
 	
 	#Get input direction (-1, 0, 1)
 	if dashType == 0 and not wallStick:
@@ -495,8 +515,7 @@ func _physics_process(delta: float) -> void:
 		if dashType == 3.3:
 			velocity.x = -dashSpeedx
 		
-		elif dashType == 3.2:
-			#velocity.x = facing * dashSpeedx
+		elif dashType == 3.2 or dashType == 3.0:
 			velocity.x = 0
 		
 		elif dashType == 3.1:
@@ -517,11 +536,9 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 
 func _process(delta: float) -> void:
-		
 	#Debug labels
 	if Input.is_action_just_pressed("debug"):
 		debugMenu *= -1
-
 	
 	if debugMenu > 0:
 		game_manager.updateDebug(
