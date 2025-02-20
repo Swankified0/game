@@ -234,19 +234,19 @@ func _physics_process(delta: float) -> void:
 		if (dashType >= 2 and dashType < 3) and not wallStick:
 			#Check if dash is horizontal
 			#Stick Right
-			if dashType == 2.3:
+			if dashType == 2.6:
 				wallStick = true
 				
 				velocity = STOP
 				wallStickRelease = WALL_STICK_RELEASE
 			#Stick Left
-			elif dashType == 2.7:
+			elif dashType == 2.4:
 				wallStick = true
 				
 				velocity = STOP
 				wallStickRelease = WALL_STICK_RELEASE
 			#"Stick" Diagonal Up, conserve vertical momentum, still allow wall jumps
-			elif (dashType == 2.2 or dashType != 2.8):
+			elif (dashType == 2.9 or dashType == 2.7):
 				wallStick = true
 				
 				velocity.x = 0
@@ -593,4 +593,4 @@ func _process(delta: float) -> void:
 	else:
 		game_manager.closeDebug()
 	
-	debug()
+	#debug()
