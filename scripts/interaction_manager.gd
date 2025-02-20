@@ -8,7 +8,7 @@ signal isTalking(value: bool)
 const baseText = "[C] to "
 
 var active_areas = []
-var canInteract = true
+var canInteract: bool = true
 
 #Receive Signals
 	#Declare variables
@@ -53,7 +53,6 @@ func _process(delta):
 	else:
 		label.hide()
 
-
 func _sort_by_distance_to_player(area1, area2):
 	var area1_to_player = player.global_position.distance_to(area1.global_position)
 	var area2_to_player = player.global_position.distance_to(area2.global_position)
@@ -61,7 +60,7 @@ func _sort_by_distance_to_player(area1, area2):
 	return area1_to_player < area2_to_player
 
 func _input(event):
-	if event.is_action_pressed("interact") and canInteract:
+	if event.is_action_pressed("interact") and canInteract and isGrounded and not isMoving:
 		if active_areas.size() > 0:
 			print(".")
 			canInteract = false
