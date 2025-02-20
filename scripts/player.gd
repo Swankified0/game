@@ -43,6 +43,9 @@ const FRICTION = 1000
 const MAX_GROUND_SPEED = 180
 const MAX_AIR_SPEED = 250
 
+const FALL_SPEED = 500
+const FASTFALL_SPEED = 700
+
 const LEAP_VELOCITY = -400
 const JUMP_VELOCITY = -360
 const HOP_VELOCITY = -275
@@ -70,19 +73,19 @@ const DASHTYPE_KEY = {
 	longGround = 1.1,
 	
 	airDefault = 2.0,
-	airUp = 2.1,
-	airUpRight = 2.2,
-	airRight = 2.3,
-	airDownRight = 2.4,
-	airDown = 2.5,
-	airDownLeft = 2.6,
-	airLeft = 2.7,
-	airUpLeft = 2.8,
+	airUp = 2.8,
+	airUpRight = 2.9,
+	airRight = 2.6,
+	airDownRight = 2.3,
+	airDown = 2.2,
+	airDownLeft = 2.1,
+	airLeft = 2.4,
+	airUpLeft = 2.7,
 	
 	landingDefault = 3.0,
-	landingDownRight = 3.1,
+	landingDownRight = 3.3,
 	landingDown = 3.2,
-	landingDownLeft = 3.3
+	landingDownLeft = 3.1
 	}
 
 const STOP: Vector2 = Vector2(0,0)
@@ -203,7 +206,7 @@ func _physics_process(delta: float) -> void:
 		hitbox_body_right.disabled = false
 	
 	#Handle Wall Stick and apply movement
-	if is_on_wall_only() and hasWallJump:
+	if is_on_wall_only() and hasWallJump or wallStick:
 		#Check if player is airdashing or not already stuck to a wall
 		if (dashType >= 2 and dashType < 3) and not wallStick:
 			#Check if dash is horizontal
@@ -250,17 +253,18 @@ func _physics_process(delta: float) -> void:
 		
 		#First tick of Dash Landing
 		if grounded and dashType > 2 and dashType < 3:
-			if dashType == 2.3 or dashType == 2.7:
+			#Horizontal Dash
+			if dashType == 2.6 or dashType == 2.4:
 				dashType = 3.0
 			
-			elif dashType == 2.4:
-				dashType = 3.1
+			elif dashType == 2.3:
+				dashType = 3.3
 			
-			elif dashType == 2.5:
+			elif dashType == 2.2:
 				dashType = 3.2
 			
-			elif dashType == 2.6:
-				dashType = 3.3
+			elif dashType == 2.1:
+				dashType = 3.1
 			
 			dashLand = true
 			hitbox_feet.disabled = false
@@ -308,17 +312,19 @@ func _physics_process(delta: float) -> void:
 	
 	#Handle dashes
 	if Input.is_action_just_pressed("dash") and dashType == 0 and not dashRelease:
+		#Ground dash
 		if grounded:
+			#Crouch dash is shorter
 			if crouching:
 				dashCountdown = DASH_TIME - 5
 				dashSpeedx = DASH_SPEED - 50
 				dashType = 1.0
-			
+			#Normal Ground Dash
 			else:
 				dashCountdown = DASH_TIME
 				dashSpeedx = DASH_SPEED
 				dashType = 1.1
-		
+		#Set default airdash, get dash cardinal
 		elif hasAirdash:
 			dashCountdown = DASH_TIME
 			dashCardinal = getCardinal()
@@ -377,11 +383,10 @@ func _physics_process(delta: float) -> void:
 		if inputVector == Vector2(-1, 1) or inputVector == Vector2(0, 1) or inputVector == Vector2(1, 1):
 			print("30")
 			velocity = Vector2(-facing * 468, -270)
-		
-		elif inputVector == Vector2(0, -1) or inputVector == Vector2(1, -1) or inputVector == Vector2(-1, -1): #60
+		#60
+		elif inputVector == Vector2(0, -1) or inputVector == Vector2(1, -1) or inputVector == Vector2(-1, -1):
 			print("60")
 			velocity = Vector2(-facing * 270, -381)
-		
 		else: #45
 			print("45")
 			velocity = Vector2(-facing * 381, -381)
@@ -412,11 +417,11 @@ func _physics_process(delta: float) -> void:
 	gravity = GRAVITY
 	#Apply max vertical speed and gravity
 	if crouching:
-		maxSpeedy = 700
+		maxSpeedy = FASTFALL_SPEED
 		gravity *= 1.5
 	
 	else:
-		maxSpeedy = 500
+		maxSpeedy = FALL_SPEED
 	
 	#Handle acceleration/decceleration
 	if direction != 0:
@@ -465,43 +470,43 @@ func _physics_process(delta: float) -> void:
 			if dashCardinal[1] < 0: #Up-right
 				dashSpeedx = 297
 				dashSpeedy = -297
-				dashType = 2.2
+				dashType = 2.9
 				
 			elif dashCardinal[1] > 0: #Down-right
 				dashSpeedx = 297
 				dashSpeedy = 297
-				dashType = 2.7
+				dashType = 2.3
 				
 			else: #right
 				dashSpeedx = DASH_SPEED
 				dashSpeedy = 0
-				dashType = 2.3
+				dashType = 2.6
 				
 		elif dashCardinal[0] < 0:
 			if dashCardinal[1] < 0: #Up-left
 				dashSpeedx = -297
 				dashSpeedy = -297
-				dashType = 2.8
+				dashType = 2.7
 				
 			elif dashCardinal[1] > 0: #Down-left
 				dashSpeedx = -297
 				dashSpeedy = 297
-				dashType = 2.6
+				dashType = 2.1
 				
 			else: #left
 				dashSpeedx = -DASH_SPEED
 				dashSpeedy = 0
-				dashType = 2.7
+				dashType = 2.4
 		else:
 			if dashCardinal[1] < 0: #Up
 				dashSpeedx = 0
 				dashSpeedy = -297
-				dashType = 2.1
+				dashType = 2.8
 				
 			else: #Down
 				dashSpeedx = 0
 				dashSpeedy = DASH_SPEED
-				dashType = 2.5
+				dashType = 2.2
 		
 		velocity.x = dashSpeedx
 		velocity.y = dashSpeedy
@@ -512,14 +517,11 @@ func _physics_process(delta: float) -> void:
 		velocity.y = 0
 	
 	elif dashLand:
-		if dashType == 3.3:
-			velocity.x = -dashSpeedx
+		if dashType == 3.3 or dashType == 3.1 or dashType == 3.0:
+			velocity.x = dashSpeedx * facing
 		
-		elif dashType == 3.2 or dashType == 3.0:
+		elif dashType == 3.2:
 			velocity.x = 0
-		
-		elif dashType == 3.1:
-			velocity.x = dashSpeedx
 	
 	#Apply gravity for not dashing
 	else:
