@@ -333,7 +333,7 @@ func _physics_process(delta: float) -> void:
 		wallJumping = true
 		
 		dashCountdown = 0
-		dashType == 0
+		dashType = 0
 		dashRelease = false
 		
 		wallJumpCountdown -= 1
