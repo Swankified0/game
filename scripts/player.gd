@@ -54,16 +54,16 @@ const HOP_VELOCITY = -275
 const GRAVITY = 981
 
 const NEAR_MISS_THRESHOLD = 5
-const STANCES = ["idle", "falling", "fastFalling", "hop", "jump", "run", "groundDash", "airDash", "dashRelease",
-"dashJump", ""]
 
 const DASH_SPEED = 420
 
 const DASH_TIME = 40
 const DASH_RELEASE = 30
 
-const WALL_STICK_RELEASE = 10
+const WALL_STICK_RELEASE = 15
 const WALL_JUMP_TIME = 10
+
+const LEAP_COUNTDOWN = 20
 
 const GROUNDDASH_FRICTION = 2.5
 const AIRDASH_FRICTION = 1.5
@@ -137,6 +137,7 @@ var debugMenu: int = -1
 var dashCountdown: int = 0
 var wallJumpCountdown: int = 0
 var wallStickRelease: int = 0
+var leapCountdown: int = 0
 
 var direction: int
 var facing: int = 1
@@ -180,6 +181,7 @@ func buffer():
 #Add jump countdown so the separation rays don't push you away from platforms
 func _physics_process(delta: float) -> void:
 	buffer()
+	print(str(dashBuffer) + " " + str(jumpBuffer))
 	
 	#Emit various player state signals
 	emit_signal("isGrounded", grounded)
@@ -228,7 +230,7 @@ func _physics_process(delta: float) -> void:
 		hitbox_body_left.disabled = true
 		hitbox_body_right.disabled = false
 	
-	#Handle Wall Stick and apply movement
+	#Handle Wall-Stick and apply movement
 	if is_on_wall_only() and hasWallJump or wallStick:
 		#Check if player is airdashing or not already stuck to a wall
 		if (dashType >= 2 and dashType < 3) and not wallStick:
@@ -266,9 +268,9 @@ func _physics_process(delta: float) -> void:
 			wallStick = false
 			wallStickRelease = 0
 	
-	#Handle dash countdowns and Dash Landing
+	#Handle dash countdowns and Dash-Landing
 	if dashCountdown > DASH_RELEASE:
-		#Disable foot hitbox and enable push boxes for airdashes
+		#Disable foot hitbox and enable push boxes for Air-Dashes
 		if dashType > 2:
 			hitbox_feet.disabled = true
 			foot_push_ray_right.disabled = false
@@ -276,16 +278,21 @@ func _physics_process(delta: float) -> void:
 		
 		#First tick of Dash Landing
 		if grounded and dashType > 2 and dashType < 3:
-			#Horizontal Dash
+			#Horizontal Dash-Land
 			if dashType == 2.6 or dashType == 2.4:
 				dashType = 3.0
 			
+			#Down-Right
 			elif dashType == 2.3:
 				dashType = 3.3
 			
+			#SPECIAL --------------------------------------------------
+			#Down
 			elif dashType == 2.2:
 				dashType = 3.2
+				leapCountdown = LEAP_COUNTDOWN
 			
+			#Down-Left
 			elif dashType == 2.1:
 				dashType = 3.1
 			
@@ -334,6 +341,11 @@ func _physics_process(delta: float) -> void:
 		walk_push_ray_left.disabled = false
 		walk_push_ray_right.disabled = false
 	
+	#Handle leap countdown
+	if leapCountdown > 0:
+		leapCountdown -= 1
+	
+	
 	#Handle dashes
 	if dashBuffer > 0 and dashType == 0 and not dashRelease:
 		dashBuffer = 0
@@ -372,11 +384,16 @@ func _physics_process(delta: float) -> void:
 	else:
 		wallJumping = false
 	
-	# Handle Jumps and Dash Jumps
+	# Handle Jumps and Dash-Jumps
 	if jumpBuffer > 0 and grounded and dashType == 0:
 		jumpBuffer = 0
 		
-		if crouching:
+		#If player is nearly stationary and Dash-Landed directly down
+		if (velocity.x > -5 or velocity.x < 5) and leapCountdown > 0:
+			leapCountdown = 0
+			velocity.y = LEAP_VELOCITY
+		
+		elif crouching:
 			if dashRelease: #Dash Hop
 				dashJump = true
 				
@@ -395,8 +412,8 @@ func _physics_process(delta: float) -> void:
 			
 		hasAirdash = true
 	
-	#Handle Wall Jumps
-	if Input.is_action_just_pressed("Jump") and wallStick and hasWallJump:
+	#Handle Wall-Jumps
+	if jumpBuffer > 0 and wallStick and hasWallJump:
 		hasAirdash = true
 		hasWallJump = false
 		wallStick = false
@@ -548,7 +565,7 @@ func _physics_process(delta: float) -> void:
 			velocity.x = dashSpeedx * facing
 		
 		elif dashType == 3.2:
-			velocity.x = 0
+			pass
 	
 	#Apply gravity for not dashing
 	else:
@@ -576,6 +593,7 @@ func _process(delta: float) -> void:
 			velocity.x,
 			velocity.y,
 			accel,
+			gravity,
 			direction,
 			inputVector,
 			facing,
@@ -585,10 +603,13 @@ func _process(delta: float) -> void:
 			dashRelease,
 			dashCountdown,
 			dashJump,
+			leapCountdown,
 			dashLand,
 			hasWallJump,
 			wallStick,
 			wallStickRelease,
+			jumpBuffer,
+			dashBuffer,
 			)
 	else:
 		game_manager.closeDebug()

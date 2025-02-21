@@ -263,6 +263,10 @@ shape = SubResource("RectangleShape2D_je7m8")
 position = Vector2(0, 16)
 shape = SubResource("RectangleShape2D_2fswy")
 
+[node name="HitboxHead" type="CollisionShape2D" parent="."]
+position = Vector2(0, -5)
+shape = SubResource("RectangleShape2D_2fswy")
+
 [node name="walkPushRayLeft" type="CollisionShape2D" parent="."]
 position = Vector2(-5, 17)
 rotation = 1.5708
