@@ -1,4 +1,4 @@
-[gd_scene load_steps=37 format=3 uid="uid://blhtoj5d8rgno"]
+[gd_scene load_steps=38 format=3 uid="uid://blhtoj5d8rgno"]
 
 [ext_resource type="Texture2D" uid="uid://dfs4k2ycmkmsb" path="res://assets/sprites/knight.png" id="1_j7apo"]
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_nafpt"]
@@ -229,8 +229,11 @@ animations = [{
 "speed": 10.0
 }]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_isb18"]
+size = Vector2(10, 21)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_je7m8"]
-size = Vector2(2, 19)
+size = Vector2(2, 21)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_2fswy"]
 size = Vector2(10, 4)
@@ -251,20 +254,20 @@ sprite_frames = SubResource("SpriteFrames_1hapk")
 animation = &"Dash"
 autoplay = "Idle"
 
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 3.5)
+shape = SubResource("RectangleShape2D_isb18")
+
 [node name="HitboxBodyLeft" type="CollisionShape2D" parent="."]
-position = Vector2(-6, 4.5)
+position = Vector2(-6, 3.5)
 shape = SubResource("RectangleShape2D_je7m8")
 
 [node name="HitboxBodyRight" type="CollisionShape2D" parent="."]
-position = Vector2(6, 4.5)
+position = Vector2(6, 3.5)
 shape = SubResource("RectangleShape2D_je7m8")
 
 [node name="HitboxFeet" type="CollisionShape2D" parent="."]
 position = Vector2(0, 16)
-shape = SubResource("RectangleShape2D_2fswy")
-
-[node name="HitboxHead" type="CollisionShape2D" parent="."]
-position = Vector2(0, -5)
 shape = SubResource("RectangleShape2D_2fswy")
 
 [node name="walkPushRayLeft" type="CollisionShape2D" parent="."]
