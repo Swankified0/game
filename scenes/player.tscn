@@ -271,19 +271,19 @@ position = Vector2(0, 16)
 shape = SubResource("RectangleShape2D_2fswy")
 
 [node name="walkPushRayLeft" type="CollisionShape2D" parent="."]
-position = Vector2(-5, 17)
+position = Vector2(-5, 17.5)
 rotation = 1.5708
 shape = SubResource("SeparationRayShape2D_uvsq4")
 
 [node name="walkPushRayRight" type="CollisionShape2D" parent="." groups=["player"]]
-position = Vector2(5, 17)
+position = Vector2(5, 17.5)
 rotation = -1.5708
 shape = SubResource("SeparationRayShape2D_uvsq4")
 
 [node name="footPushRayRight" type="CollisionShape2D" parent="."]
-position = Vector2(5, 14)
+position = Vector2(7, 14)
 shape = SubResource("SeparationRayShape2D_rclxr")
 
 [node name="footPushRayLeft" type="CollisionShape2D" parent="."]
-position = Vector2(-5, 14)
+position = Vector2(-7, 14)
 shape = SubResource("SeparationRayShape2D_rclxr")
